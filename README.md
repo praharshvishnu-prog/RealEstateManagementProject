@@ -65,7 +65,7 @@ These relationships are maintained using **primary keys and foreign keys**.
 * Owner and agent record management
 * Customer information management
 * Property sale or rental transaction tracking
-* SQL queries for retrieving and analyzing data
+* Queries for retrieving and analyzing data
 
 ---
 
