@@ -1,0 +1,397 @@
+## Basic Data Retrieval
+
+**1. View all reviews**
+
+```sql
+SELECT * FROM reviews;
+```
+
+Displays all records stored in the `reviews` table.
+
+**2. View structure of properties table**
+
+```sql
+DESCRIBE properties;
+```
+
+Shows the columns, data types, and structure of the `properties` table.
+
+---
+
+## Updating Data
+
+**3. Update property title**
+
+```sql
+UPDATE properties 
+SET property_title = 'Independent House Chromepet'
+WHERE property_id = 55;
+```
+
+Updates the title of the property whose ID is 55.
+
+**4. Modify phone column in customers table**
+
+```sql
+ALTER TABLE customers
+MODIFY phone VARCHAR(20);
+```
+
+Changes the data type of the `phone` column to allow up to 20 characters.
+
+**5. Update property price**
+
+```sql
+UPDATE properties
+SET price = 9000000
+WHERE property_id = 2;
+```
+
+Updates the price of property with ID 2.
+
+---
+
+## Filtering Data
+
+**6. Properties in Chennai**
+
+```sql
+SELECT * FROM properties
+WHERE city = 'Chennai';
+```
+
+Retrieves all properties located in Chennai.
+
+**7. Properties above a certain price**
+
+```sql
+SELECT * FROM properties
+WHERE price > 10000000;
+```
+
+Displays properties priced above 10,000,000.
+
+---
+
+## Aggregate Functions
+
+**8. Highest property price**
+
+```sql
+SELECT MAX(price) AS highest_price
+FROM properties;
+```
+
+Finds the most expensive property in the database.
+
+**9. Lowest rental property price**
+
+```sql
+SELECT MIN(price) AS lowest_price
+FROM properties
+WHERE listing_type = 'Rent';
+```
+
+Finds the lowest rental price among properties listed for rent.
+
+---
+
+## Grouping Data
+
+**10. Count properties by city**
+
+```sql
+SELECT city, COUNT(*) AS total
+FROM properties
+GROUP BY city;
+```
+
+Counts how many properties exist in each city.
+
+---
+
+## Join Queries
+
+**11. Customer transactions**
+
+```sql
+SELECT t.transaction_id, c.customer_name, t.transaction_amount
+FROM transactions t
+JOIN customers c
+ON t.customer_id = c.customer_id;
+```
+
+Shows transaction details along with the customer name.
+
+**12. Property transaction details**
+
+```sql
+SELECT p.property_title, c.customer_name, a.agent_name, t.transaction_amount
+FROM transactions t
+JOIN properties p ON t.property_id = p.property_id
+JOIN customers c ON t.customer_id = c.customer_id
+JOIN agents a ON t.agent_id = a.agent_id;
+```
+
+Displays property, customer, agent, and transaction amount for each deal.
+
+---
+
+## Subqueries
+
+**13. Most expensive property**
+
+```sql
+SELECT * 
+FROM properties
+WHERE price = (SELECT MAX(price) FROM properties);
+```
+
+Finds the property with the highest price.
+
+**14. Customers with high-value transactions**
+
+```sql
+SELECT customer_name
+FROM customers
+WHERE customer_id IN (
+SELECT customer_id
+FROM transactions
+WHERE transaction_amount > 10000000
+);
+```
+
+Shows customers who made transactions above 10,000,000.
+
+---
+
+## Analytical Queries
+
+**15. Total revenue from sales**
+
+```sql
+SELECT SUM(transaction_amount) AS total_revenue
+FROM transactions
+WHERE transaction_type = 'Sale';
+```
+
+Calculates the total revenue from property sales.
+
+**16. Agent with most deals**
+
+```sql
+SELECT agent_id, COUNT(*) AS total_deals
+FROM transactions
+GROUP BY agent_id
+ORDER BY total_deals DESC
+LIMIT 1;
+```
+
+Finds the agent who completed the highest number of transactions.
+
+**17. Properties with more than three amenities**
+
+```sql
+SELECT property_id, COUNT(amenity_id) AS amenity_count
+FROM property_amenities
+GROUP BY property_id
+HAVING COUNT(amenity_id) > 3;
+```
+
+Lists properties that have more than three amenities.
+
+---
+
+## Properties Without Related Data
+
+**18. Properties without visits**
+
+```sql
+SELECT property_id, property_title
+FROM properties
+WHERE property_id NOT IN (SELECT property_id FROM visits);
+```
+
+Finds properties that have never been visited by customers.
+
+---
+
+## Conditional Queries
+
+**19. Categorize properties by price**
+
+```sql
+SELECT property_title, price,
+CASE
+WHEN price >= 20000000 THEN 'Premium'
+WHEN price >= 10000000 THEN 'Mid-Range'
+ELSE 'Budget'
+END AS price_category
+FROM properties;
+```
+
+Classifies properties into price categories.
+
+**20. Region classification**
+
+```sql
+SELECT property_title, city,
+CASE
+WHEN city = 'Chennai' THEN 'Tamil Nadu Region'
+ELSE 'Other State'
+END AS region_type
+FROM properties
+ORDER BY city;
+```
+
+Labels properties based on location.
+
+**21. Property value classification**
+
+```sql
+SELECT property_title, price,
+IF(price > 10000000, 'High Value', 'Normal Value') AS value_type
+FROM properties;
+```
+
+Categorizes properties based on price value.
+
+---
+
+## Join Types
+
+**22. Left Join – Properties and owners**
+
+```sql
+SELECT p.property_title, o.owner_name
+FROM properties p
+LEFT JOIN owners o
+ON p.owner_id = o.owner_id;
+```
+
+Shows all properties and their owners, including properties without an owner.
+
+**23. Properties with multiple transactions**
+
+```sql
+SELECT p.property_title, COUNT(t.transaction_id) AS total_transactions
+FROM properties p
+LEFT JOIN transactions t
+ON p.property_id = t.property_id
+GROUP BY p.property_id
+HAVING COUNT(t.transaction_id) > 1;
+```
+
+Finds properties involved in more than one transaction.
+
+**24. Right Join – Agents without transactions**
+
+```sql
+SELECT a.agent_name
+FROM transactions t
+RIGHT JOIN agents a
+ON t.agent_id = a.agent_id
+WHERE t.transaction_id IS NULL;
+```
+
+Lists agents who have not handled any transactions.
+
+**25. Cross Join – Customers and agents**
+
+```sql
+SELECT c.customer_name, a.agent_name
+FROM customers c
+CROSS JOIN agents a
+ORDER BY a.agent_name;
+```
+
+Creates all possible combinations of customers and agents.
+
+---
+
+## Additional Subqueries
+
+**26. Properties with reviews**
+
+```sql
+SELECT property_title
+FROM properties
+WHERE property_id IN (
+SELECT property_id
+FROM reviews
+);
+```
+
+Finds properties that have received reviews.
+
+**27. Unsold properties**
+
+```sql
+SELECT property_title
+FROM properties
+WHERE property_id NOT IN (
+SELECT property_id
+FROM transactions
+WHERE transaction_type = 'Sale'
+);
+```
+
+Lists properties that have not been sold.
+
+**28. Active agents**
+
+```sql
+SELECT agent_name
+FROM agents
+WHERE agent_id IN (
+SELECT agent_id
+FROM transactions
+GROUP BY agent_id
+HAVING COUNT(*) > 2
+);
+```
+
+Finds agents who have handled more than two transactions.
+
+**29. Properties priced above city average**
+
+```sql
+SELECT property_title, city, price
+FROM properties p
+WHERE price > (
+SELECT AVG(price)
+FROM properties
+WHERE city = p.city
+);
+```
+
+Displays properties priced above the average price in their city.
+
+---
+
+## Data Deletion Operations
+
+**30. Delete old visits**
+
+```sql
+DELETE FROM visits
+WHERE visit_date < '2025-01-01';
+```
+
+Removes visit records before January 1, 2025.
+
+**31. Remove all visit records**
+
+```sql
+TRUNCATE TABLE visits;
+```
+
+Deletes all records from the `visits` table quickly.
+
+**32. Remove reviews table**
+
+```sql
+DROP TABLE reviews;
+```
+
+Permanently deletes the `reviews` table from the database.
